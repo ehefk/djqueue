@@ -8,7 +8,7 @@ DJ Queue bot for Just Dance Streams using Discord and Twitch
   - Bot rejects requests that aren't a URL or song number in the database
   - Points refunded after request processed
 
-- Queue controlled using reactions to recent bot posts
+- Queue controlled in Discord channel, by reaction to recent bot posts
 - Number of requests tracked per session & all time
 
 Twitch Output Example:
