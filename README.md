@@ -12,6 +12,7 @@ DJ Queue bot for Just Dance Streams using Discord and Twitch
   - Display unknown url metadata for DJ approval
 
 - Track duplicate requests per session & all time
+  - Alert DJ to duplicates in queue or reject if played too recently
 
 
 Twitch Output Example:
