@@ -4,14 +4,14 @@ DJ Queue bot for Just Dance Streams using Discord and Twitch
 - ***PythonTwitchBotFramework*** - Twitch IRC w PubSub client  https://pypi.org/project/PythonTwitchBotFramework/
 - ***discord.py*** - Discord queue, stats, control panel https://discordpy.readthedocs.io/en/stable/ 
 
-1. User requests with points - uses Twitch PubSub client to track
+- User requests with points - uses Twitch PubSub client to track
   - Bot rejects requests that aren't a URL or song number in the database
   - Points refunded after request processed
 
-2. Queue controlled in Discord channel, by reaction to recent bot posts
+- Queue controlled in Discord channel, by reaction to recent bot posts
   - Display url metadata for DJ approval
 
-3. Track duplicate requests per session & all time
+- Track duplicate requests per session & all time
 
 
 Twitch Output Example:
