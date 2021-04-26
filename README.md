@@ -9,7 +9,7 @@ DJ Queue bot for Just Dance Streams using Discord and Twitch
   - Points refunded after request processed
 
 - Queue controlled in Discord channel, by reaction to recent bot posts
-  - Display url metadata for DJ approval
+  - Display unknown url metadata for DJ approval
 
 - Track duplicate requests per session & all time
 
