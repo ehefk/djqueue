@@ -49,6 +49,7 @@ Queue Data Node - Actually a doubly linked list
 {
   "next": "next",
   "prev": "prev",
+  "queuePos": 7
   "data": {
     "songId": 0,
     "songTitle": "GHOSTDATA_ Full Bodied",
@@ -56,5 +57,4 @@ Queue Data Node - Actually a doubly linked list
     "timesRequested": 6,
     "songLength": 120,   #in seconds
     "queueETA": 120,   #in seconds
-    "queuePosition": 7
   }
