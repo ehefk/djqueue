@@ -37,8 +37,6 @@ Song Data
     "songLength": 120,   #in seconds
     "timesPlayed": 999,
     "timesRequested": 1234,
-    "timesPlayedToday": 3,
-    "timesRequestedToday": 6
   }
 }
 ```
@@ -54,7 +52,8 @@ Queue Data Node - Actually a doubly linked list
     "songId": 0,
     "songTitle": "GHOSTDATA_ Full Bodied",
     "songURI": "uri",
-    "timesRequested": 6,
     "songLength": 120,   #in seconds
     "queueETA": 120   #in seconds
+    "timesPlayedToday": 3,
+    "timesRequestedToday": 6
   }
