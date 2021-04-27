@@ -58,3 +58,17 @@ Queue Data Node - Actually a doubly linked list
     "timesRequestedToday": 6
   }
 }
+```
+
+Already Played List - Delete nodes after they've been played and put here
+
+```json
+{
+  "songId":0
+  "data": {
+    "songId": 0,
+    "songTitle": "GHOSTDATA_ Full Bodied",
+    "songURI": "uri",
+    "timesPlayedToday": 3,
+    "timesRequestedToday": 6
+  }
