@@ -36,7 +36,7 @@ Song Data
   "songStats": {
     "songLength": 120,   #in seconds
     "timesPlayed": 999,
-    "timesRequested": 1234,
+    "timesRequested": 1234
   }
 }
 ```
@@ -57,3 +57,4 @@ Queue Data Node - Actually a doubly linked list
     "timesPlayedToday": 3,
     "timesRequestedToday": 6
   }
+}
