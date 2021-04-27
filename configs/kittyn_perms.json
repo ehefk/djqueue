@@ -1,0 +1,19 @@
+{
+  "admin": {
+    "name": "admin",
+    "permissions": [
+      "*"
+    ],
+    "members": [
+      "kittyn"
+    ]
+  },
+  "global": {
+    "name": "global",
+    "permissions": [
+      "vote",
+      "listpolls"
+    ],
+    "members": []
+  }
+}

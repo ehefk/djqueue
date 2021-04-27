@@ -1,0 +1,42 @@
+{
+  "nick": "djqueue_",
+  "oauth": "oauth:we3ts6lxqym5wnxo40psyezzan8j4d",
+  "client_id": "hvtcbdpcc4chcs2622nz3d0bm5jj6j",
+  "prefix": "!",
+  "default_balance": 200,
+  "loyalty_interval": 60,
+  "loyalty_amount": 2,
+  "owner": "kittyn",
+  "channels": [
+    "djqueue_",
+    "kittyn",
+    "totless"
+  ],
+  "mods_folder": "mods",
+  "commands_folder": "commands",
+  "command_server_enabled": true,
+  "command_server_port": 1337,
+  "command_server_host": "0.0.0.0",
+  "command_server_password": "",
+  "disable_whispers": true,
+  "use_command_whitelist": false,
+  "send_message_on_command_whitelist_deny": true,
+  "send_message_on_disabled_command_use": true,
+  "command_whitelist": [
+    "help",
+    "commands",
+    "reloadcmdwhitelist",
+    "reloadmod",
+    "reloadperms",
+    "disablemod",
+    "enablemod",
+    "disablecmdglobal",
+    "disablecmd",
+    "enablecmdglobal",
+    "enablecmd",
+    "addcmd",
+    "delcmd",
+    "updatecmd",
+    "cmd"
+  ]
+}
