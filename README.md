@@ -30,8 +30,8 @@ Song Data
   "songInfo": {
     "songArtist": "GHOSTDATA_",
     "songName": "Full Bodied",
-    "songURI": "uri",
-  }
+    "songURI": "uri"
+  },
   
   "songStats": {
     "songLength": 120,   #in seconds
@@ -56,5 +56,5 @@ Queue Data Node - Actually a doubly linked list
     "timesRequested": 6,
     "songLength": 120,   #in seconds
     "queueETA": 120,   #in seconds
-    "queuePosition": 7,  
+    "queuePosition": 7
   }
