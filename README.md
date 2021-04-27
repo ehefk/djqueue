@@ -47,8 +47,8 @@ Queue Data Node - Actually a doubly linked list
 
 ```json
 {
-  "next": next,
-  "prev": prev,
+  "next": "next",
+  "prev": "prev",
   "data": {
     "songId": 0,
     "songTitle": "GHOSTDATA_ Full Bodied",
