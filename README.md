@@ -22,3 +22,39 @@ Twitch Output Example:
   > "Artist - Title placed #xx in queue.  ETA: xx:xx  Requested X times today."
 
 
+Song Data
+
+```json
+{
+  "songId": 0,
+  "songInfo": {
+    "songArtist": "GHOSTDATA_",
+    "songName": "Full Bodied",
+    "songURI": "uri",
+  }
+  
+  "songStats": {
+    "songLength": 120,   #in seconds
+    "timesPlayed": 999,
+    "timesRequested": 1234,
+    "timesPlayedToday": 3,
+    "timesRequestedToday": 6
+  }
+}
+```
+
+Queue Data Node - Actually a doubly linked list
+
+```json
+{
+  "next": next,
+  "prev": prev,
+  "data": {
+    "songId": 0,
+    "songTitle": "GHOSTDATA_ Full Bodied",
+    "songURI": "uri",
+    "timesRequested": 6,
+    "songLength": 120,   #in seconds
+    "queueETA": 120,   #in seconds
+    "queuePosition": 7,  
+  }
