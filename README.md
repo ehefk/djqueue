@@ -53,7 +53,7 @@ Queue Data Node - Actually a doubly linked list
     "songTitle": "GHOSTDATA_ Full Bodied",
     "songURI": "uri",
     "songLength": 120,   #in seconds
-    "queueETA": 120   #in seconds
+    "queueETA": 120,   #in seconds
     "timesPlayedToday": 3,
     "timesRequestedToday": 6
   }
