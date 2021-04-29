@@ -39,7 +39,7 @@ class DMCA(Mod):
             uri = extractor.find_urls(frag)
 
             if uri:
-            
+
                 o = urlparse(uri[0])
                 #print(o)
 
@@ -61,7 +61,7 @@ class DMCA(Mod):
                     if word.isdigit():
                         self.songID = int(word)
                         songID = self.songID
-                        if songID < 1600 and songID > 1:
+                        if songID < 1600 and songID > 0:
                             ##################################
                             #####  Found valid song ID, process it
                             #####
@@ -104,8 +104,9 @@ class DMCA(Mod):
 
         ##############################################
         ##  check if song already requested but not yet played, if so, increment request count
-        ##   - check if requester is in last 5 requests
+        ##   - check if requester is in last 5 requests or Marshall Song
         ##      - add song to end of queue if not
+        ##      - add marshall requests to marshall queue
         ##      - else add song to randomizer queue
         ##
 
