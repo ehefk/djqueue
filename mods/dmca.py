@@ -15,7 +15,7 @@ class DMCA(Mod):
     songID = 0
 
     #################################
-    #####  Class constructor, read json database
+    #####  Class constructor, read json database - since only needed by chat ingest this is fine
     #####
     def __init__(self):
         with open('songdata.json') as json_file:
@@ -43,7 +43,7 @@ class DMCA(Mod):
                 o = urlparse(uri[0])
                 #print(o)
 
-                if 'youtube' in o.netloc:
+                if 'youtube' in o.netloc or 'youtu.be' in o.netloc:
                     ##################################
                     ### Found a valid YT link, process it
                     ###
@@ -97,14 +97,22 @@ class DMCA(Mod):
         else:
             title = "JSON Fetch"
 
+        ################################################################
+        ################################################################
+        ###
+        ###     Chatbot will write out song info nodes to the queue
+        ###     Discordbot will read them and remove them from the queue
+        ###     Queue is a doubly-linked-list to allow random deletions
+        ###     Need some inter-thread function here
+        ###
 
         ##############################################
-        ##  check if song already played, if so, increment request count
+        ##  check if song already played, if so, increment request count and inform requester
         ##
 
         ##############################################
         ##  check if song already requested but not yet played, if so, increment request count
-        ##   - check if requester is in last 5 requests or Marshall Song
+        ##   - check if requester is in last 5 requests or requesting fitness Marshall Songs
         ##      - add song to end of queue if not
         ##      - add marshall requests to marshall queue
         ##      - else add song to randomizer queue
