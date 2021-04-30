@@ -1,0 +1,14 @@
+{
+	"id": 0,
+	"info": {
+		"artist": "GHOSTDATA_",
+		"name": "Full Bodied",
+	        "URI": "uri"
+	},
+		    
+	"stats": {
+	        "length": 120,
+		"timesPlayed": 999,
+		"timesRequested": 1234
+	}
+}
