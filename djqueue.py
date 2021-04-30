@@ -1,23 +1,22 @@
 # Import Libraries
 import asyncio
-import queue
 import threading
-import discord_bot
+import discord_bot.discord_bot as discord_bot
 from twitchbot import BaseBot
 
 
-def DiscordBot(queues):
+def DiscordBot():
     print("Started Discord Thread")
     discordloop = asyncio.new_event_loop()
     asyncio.set_event_loop(discordloop)
     asyncio.get_event_loop()
-    bot = discord_bot.Bot(queues)
-    discordloop.create_task(bot.start("ODIyMzE3NzU5MzIzOTYzNDIz.YFQhFw.m080OUzrbbwDaYvHrnxiAD3K6SU"))
+    bot = discord_bot.Bot()
+    discordloop.create_task(bot.start("ODIyMzE3NzU5MzIzOTYzNDIz.YFQhFw.eaX6iFiCkic_cNiBSikvmLj7l5U"))
     print("Starting Discord Loop")
     discordloop.run_forever()
 
 
-def TwitchBot(queues):
+def TwitchBot():
     print("Started Twitch Thread")
     relayloop = asyncio.new_event_loop()
     asyncio.set_event_loop(relayloop)
@@ -29,14 +28,11 @@ def TwitchBot(queues):
 
 if __name__ == '__main__':
     # Create Communication Queues
-    DiscordQueue = queue.Queue()
-    TwitchQueue = queue.Queue()
-
-    DiscordThread = threading.Thread(target=DiscordBot, args=((DiscordQueue, TwitchQueue),))
+    DiscordThread = threading.Thread(target=DiscordBot, args=())
     DiscordThread.daemon = False
     DiscordThread.start()
 
-    TwitchThread = threading.Thread(target=TwitchBot, args=((DiscordQueue, TwitchQueue),))
+    TwitchThread = threading.Thread(target=TwitchBot, args=())
     TwitchThread.daemon = False
     TwitchThread.start()
 
