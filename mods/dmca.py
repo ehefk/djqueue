@@ -11,8 +11,8 @@ class DMCA(Mod):
     #################################
     #####  Globals
     #####
-    songdata = {}
-    songID = 0
+    songdata = {}   ## The full json file data set
+    songID = 0      ## Actually not sure why this is needed -- it can't be declared at the top of the async function
 
     #################################
     #####  Class constructor, read json database - since only needed by chat ingest this is fine
@@ -103,7 +103,8 @@ class DMCA(Mod):
         ###     Chatbot will write out song info nodes to the queue
         ###     Discordbot will read them and remove them from the queue
         ###     Queue is a doubly-linked-list to allow random deletions
-        ###     Need some inter-thread function here
+        ###     Need some async functionality here to communicate w discordbot
+        ###
         ###
 
         ##############################################
