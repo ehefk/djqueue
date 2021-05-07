@@ -8,14 +8,27 @@ import sys
 import traceback
 import discord_bot.embedtemplates as embedtemplates
 import sqlite3
+import persistqueue
+from discord.ext import tasks
 
 
 class Bot(discord.Client):
+    
+    cnt = 0
+    updated = 1
+    Q_LEN = 1
+
     def __init__(self, *args, **kwargs):
         asyncio.get_event_loop()
         super().__init__(*args, **kwargs)
         self.YT_API = build('youtube', 'v3', developerKey="AIzaSyDRB1VWeyZnmnKBYFg9NOg7YNd5Gpy__aY")
+        self.check_queue.start()
 
+    #########################################################
+    ##
+    ##
+    ##
+    ##
     async def get_sql(self):
         def dict_factory(cursor, row):
             d = {}
@@ -26,6 +39,11 @@ class Bot(discord.Client):
         sql.row_factory = dict_factory
         return sql
 
+    #########################################################
+    ##
+    ##
+    ##
+    ##
     async def run_file(self, filename, message="", arguments=""):
         command_found = False
         for command_file in os.listdir("discord_bot/commands"):
@@ -40,6 +58,11 @@ class Bot(discord.Client):
         if not command_found:
             await message.channel.send("Command not found!")
 
+    #########################################################
+    ##
+    ##
+    ##
+    ##
     async def await_response(self, user):
         def check(message):
             return message.author == user
@@ -50,29 +73,99 @@ class Bot(discord.Client):
             return None
         return content
 
-    async def check_queue(self):
-        while True:  # Loops background task
-            sql = await self.get_sql()
-            cursor = sql.cursor()
-            dataset = cursor.execute('SELECT * FROM "song_requests"  WHERE "status" LIKE "%Pending%"')
-            for data in dataset:
-                await self.wait_until_ready()  # Ensure the Discord Bot is connected (waits if timed out for reconnect)
-                spec = importlib.util.spec_from_file_location("module.name", str("discord_bot/handle_queue.py"))
-                foo = importlib.util.module_from_spec(spec)
-                spec.loader.exec_module(foo)
-                message_id = await foo.Main(self, data)
-                cursor.execute('UPDATE "song_requests" SET "status" = "In Queue", "discord_message_id" = ' + str(message_id) + ' WHERE "id" = ' + str(data["id"]))
-            sql.commit()
-            sql.close()
-            await asyncio.sleep(0.5)  # Wait a half a second before looping again
-            continue
 
+    ######################################################
+    ##   Background tasks
+    ##
+    ##
+    @tasks.loop(seconds=1) 
+    async def check_queue(self):
+
+        sql = await self.get_sql()
+
+        cursor = sql.cursor()
+        dataset = cursor.execute('SELECT * FROM "song_requests"  WHERE "status" LIKE "%Pending%"')
+        
+        for data in dataset:
+            await self.wait_until_ready()  # Ensure the Discord Bot is connected (waits if timed out for reconnect)
+            spec = importlib.util.spec_from_file_location("module.name", str("discord_bot/handle_queue.py"))
+            foo = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(foo)
+            message_id = await foo.Main(self, data)
+            print("before d update")
+            cursor.execute('UPDATE "song_requests" SET "status" = "In Queue", "discord_message_id" = ' + str(message_id) + ' WHERE "song_id" = ' + str(data["song_id"]))
+            self.updated = 1
+            #sql.commit()
+            #cursor.close()
+
+        dataset = cursor.execute('SELECT * FROM "song_requests"  WHERE "status" LIKE "%In Queue%" ORDER BY id ASC')
+
+
+        #########
+        ##  Table updated if this is true
+        ##
+        if self.updated:
+            self.updated = 0
+
+            ############
+            ###  Scan the rows, stop after a few (adjust Q_LEN)
+            ###
+            for data in dataset:
+
+                ###########
+                ##  Only interested if no message for dj ui
+                ##
+                ##
+                if data["djq_message_id"] is None:
+
+                    ##############
+                    ##
+                    ##  If there's already a few at the top for the dj then we're done
+                    ##
+                    if self.cnt < self.Q_LEN:
+                        #print("dj ui setup")
+
+                        spec = importlib.util.spec_from_file_location("module.name", str("discord_bot/handle_ui.py"))
+                        foo = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(foo)
+                        message_id = await foo.Main(self, data)
+                        if message_id: 
+                            cursor.execute('UPDATE "song_requests" SET "status" = "In Queue", "djq_message_id" = ' + str(message_id) + ' WHERE "song_id" = ' + str(data["song_id"]))
+                            if self.Q_LEN < 3:
+                                self.Q_LEN = self.Q_LEN + 1
+
+                        self.cnt = self.cnt + 1
+                        self.updated = 0
+                        #############################
+                        ##  could be a problem w logic here
+                        ##
+                        ##  i think this is right lol
+                        ##
+                    else:
+                        break
+
+                #else:
+                    #print("continue")
+
+
+        sql.commit()
+        sql.close()
+    #########################################################
+    ##
+    ##  Runs when bot starts
+    ##
+    ##
     async def on_ready(self):
         print('Logged into discord as "{0.user}"'.format(self))
         activity = discord.Activity(name="music.", type=discord.ActivityType.listening)
         await self.change_presence(activity=activity)
-        self.loop.create_task(await self.check_queue())
+        #self.loop.create_task(await self.check_queue())
 
+    #########################################################
+    ##
+    ##
+    ##
+    ##
     async def on_error(self, event, *args, **kwargs):
         type, value, tb = sys.exc_info()
         if event == "on_message":
@@ -101,6 +194,11 @@ class Bot(discord.Client):
             arguments = message.content[1:].replace(str(command + " "), "")
             await self.run_file(command, message, arguments)
 
+    #########################################################
+    ##
+    ##
+    ##
+    ##
     async def question(self, user, question, channel=None):  # Ask the user a question, specify a channel or it'll DM
         if channel is not None:
             await channel.send(content="", embed=embedtemplates.question(question, user.display_name))
@@ -123,6 +221,11 @@ class Bot(discord.Client):
                 print(user.name, "Could not be messaged.")
                 return None
 
+    #########################################################
+    ##
+    ##
+    ##
+    ##
     async def on_raw_reaction_add(self, payload):
         channel = await self.fetch_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
@@ -136,4 +239,8 @@ class Bot(discord.Client):
             spec = importlib.util.spec_from_file_location("module.name", str("discord_bot/handle_reactions.py"))
             foo = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(foo)
-            await foo.Main(self, channel, message, user, emoji)
+            self.updated = await foo.Main(self, channel, message, user, emoji)
+            if self.updated == 1:
+                self.cnt = self.cnt - 1
+        
+            
