@@ -7,6 +7,7 @@ import datetime
 import sqlite3
 import json
 from googleapiclient.discovery import build
+import MongoDBInterface
 
 
 ####
@@ -66,6 +67,10 @@ class DMCA(Mod):
         #####
         if '!dance' in frag:
             await msg.reply(f'{msg.author}, the pypy site is temporarily down but you can find the list here: https://bit.ly/3eJly0i')
+
+        if '!reset' in frag and msg.author.lower() == "ramiris_":
+            mongo = MongoDBInterface.Main()  # Prepares the database ( NO Cursor required )
+            mongo.db["Requests"].delete({'$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}]})  # Removes any uncomplete Requests
             
         if '!dmca' in frag:
             ####################################
@@ -127,17 +132,9 @@ class DMCA(Mod):
 ###     9999 = Storage record for current queue length
 ###
 ###
-        con = sqlite3.connect("database.sqlite")
-        cur = con.cursor()
-        sqlite_query = """SELECT COUNT(*) FROM song_requests WHERE status = 'In Queue'"""
-        cur.execute(sqlite_query)
-
-        qPos = cur.fetchone()[0]
-
-        cur.close()
-        con.close()
-
-        print("qPos => " + str(qPos))
+        mongo = MongoDBInterface.Main()  # Prepares the database ( NO Cursor required )
+        qPos = str(mongo.db["Requests"].count_documents({'Status': 'In Queue'}))
+        print("qPos => " + qPos)
 
         title = ""
 
@@ -150,49 +147,29 @@ class DMCA(Mod):
         ##
         if isinstance(uri, int):
 
-            sqlite_query = """SELECT * FROM song_list WHERE id = ?"""
-            cursor.execute(sqlite_query, (uri,))
+            song = mongo.db["PyPySongList"].find_one({"id": int(uri)})
 
-            rec = cursor.fetchone()
+            request = mongo.db["Requests"].find_one({"URI": int(uri), '$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}]})
 
-            songid = rec["id"]
-            title = rec["title"]
-
-            # dupe logic
-            sqlite_query = """SELECT * FROM song_requests where song_id = ?"""
-            cursor.execute(sqlite_query, (songid,))
-
-            rec = cursor.fetchone()
-            print(rec)
-            print(uri)
-            print("nani")
-
-            if rec:
-                x_requested = rec["x_requested"] + 1
-                #
+            if request:
+                request["TimesRequested"] += 1
+                mongo.db["Requests"].replace_one({"URI": int(uri), '$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}]}, request)
                 # UPDATE, send msg then return
-                sqlite_query = "UPDATE 'song_requests' SET 'status' = 'Pending', 'x_requested' = " + str(x_requested) + " WHERE song_id = " + str(songid)
-                cursor.execute(sqlite_query)
-                sql.commit()
-                sql.close()
 
-                await msg.reply(f'{msg.author}, thanks for the request!  {title}  Has now been requested {x_requested} times and played {x_played} times.')
+                await msg.reply(f'{msg.author}, thanks for the request!  {song["title"]}  Has now been requested {request["TimesRequested"]} times and played {request["TimesPlayed"]} times.')
 
                 return
 
             else:
-                sqlite_query = """INSERT INTO song_requests (user, request, timestamp, status, discord_message_id, uri, x_played, x_requested, song_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"""
-                cursor.execute(sqlite_query, (msg.author, title, datetime.datetime.now(), "Pending", 1, uri,x_played,x_requested, songid))
+                if "TimesPlayed" in song.keys():
+                    mongo.create_request(msg.author, uri, song["TimesPlayed"])
+                else:
+                    mongo.create_request(msg.author, uri, 0)
 
-
-
-            sql.commit()
-            cursor.close()
-
-
-            self.qETA += 120
-            
-
+            if "Duration" in song.keys():
+                self.qETA += song["Duration"]
+            else:
+                self.qETA += 120
             
         ##############################################
         ##  uri is a YT link, see if it matches JD then load it
@@ -219,6 +196,9 @@ class DMCA(Mod):
                 return
             else:  # Song Found
                 title = response["items"][0]["snippet"]["title"]
+                length = response["items"][0]["contentDetails"]["duration"]  # Length in format "PT##M##S"
+                length = int(length.split("M")[0][2:])*60 + int(length.split("M")[1][:-1])  # Length in Seconds
+                song = mongo.db["SongHistory"].find_one({"URI": int(uri)})
 
                 ################################################################
                 ################################################################
@@ -245,21 +225,20 @@ class DMCA(Mod):
                 ##      - else add song to randomizer queue
                 ##
                 if "Marshall" in title:
-                    dataset = cursor.execute(
-                        'SELECT * FROM "song_requests"  WHERE "status" LIKE "%In Queue%" ORDER BY id ASC')
-                    MarshallCount = 0
-                    for data in dataset:
-                        if "Marshall" in data["request"]:
-                            MarshallCount += 1
-                    if MarshallCount >= 2:
-                        status = "On Hold"
+                    Search = mongo.db["Requests"].count_documents({'$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}], 'Tags': {'$in': ['Marshall']}})
+                    if len(Search) >= 2:
 
+                        if song:
+                            mongo.create_request(msg.author, uri, song["TimesPlayed"], status="On Hold")
+                        else:
+                            mongo.create_request(msg.author, uri, 0, status="On Hold")
 
+                if song:
+                    mongo.create_request(msg.author, uri, song["TimesPlayed"])
+                else:
+                    mongo.create_request(msg.author, uri, 0)
 
-                sqlite_query = """INSERT INTO song_requests (user, request, timestamp, status, discord_message_id, uri, x_played, x_requested) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""
-                cursor.execute(sqlite_query, (msg.author, title, datetime.datetime.now(), status, 1, uri, x_played, x_requested))
-                sql.commit()
-                cursor.close()
+                self.qETA += length
 
         ##############################################
         ##  

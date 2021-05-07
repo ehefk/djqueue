@@ -38,20 +38,20 @@ def dj_update(data):
     return embed
 
 def pypy_request(data):
-    embed = discord.Embed(title="PyPy Song ID:  " + data["uri"], colour=discord.Colour(0xbb00bb),
-                          description=str("*Requested by: " + data["user"] + "*"),
+    embed = discord.Embed(title="PyPy Song ID:  " + str(data["URI"]), colour=discord.Colour(0xbb00bb),
+                          description=str("*Requested by: " + data["User"] + "*"),
                           timestamp=datetime.datetime.utcnow())
-    embed.add_field(name="Title:", value=data["request"], inline=False)
-    embed.add_field(name="Played: ", value=data["x_played"], inline=True)
-    embed.add_field(name="Requests: ", value=data["x_requested"], inline=True)
+    embed.add_field(name="Title:", value=data["Name"], inline=False)
+    embed.add_field(name="Played: ", value=data["TimesPlayed"], inline=True)
+    embed.add_field(name="Requests: ", value=data["TimesRequested"], inline=True)
     return embed
 
 
 def song_request(data):
-    embed = discord.Embed(title="YouTube URL:  " + data["uri"], colour=discord.Colour(0xbb00bb),
-                          description=str("*Requested by: " + data["user"] + "*"),
+    embed = discord.Embed(title="YouTube URL:  " + str(data["URI"]), colour=discord.Colour(0xbb00bb),
+                          description=str("*Requested by: " + data["User"] + "*"),
                           timestamp=datetime.datetime.utcnow())
-    embed.add_field(name="Title:", value=data["request"], inline=False)
-    embed.add_field(name="Played: ", value=data["x_played"], inline=True)
-    embed.add_field(name="Requests: ", value=data["x_requested"], inline=True)
+    embed.add_field(name="Title:", value=data["Name"], inline=False)
+    embed.add_field(name="Played: ", value=data["TimesPlayed"], inline=True)
+    embed.add_field(name="Requests: ", value=data["TimesRequested"], inline=True)
     return embed

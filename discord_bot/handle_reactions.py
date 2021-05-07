@@ -3,11 +3,9 @@ import discord
 
 async def Main(self, channel, message, user, emoji):
     async def complete_request():
-        sql = await self.get_sql()
-        cursor = sql.cursor()
-        cursor.execute('UPDATE "song_requests" SET "status" = "Complete" WHERE "discord_message_id" = ' + str(message.id))
-        sql.commit()
-        sql.close()
+        Request = self.mongo.db["Requests"].find_one({"DiscordMessageID": message.id})
+        Request["Status"] = "Complete"
+        self.mongo.db["Requests"].replace_one({"DiscordMessageID": message.id}, Request)
 
     if "GreenTick" in str(emoji):
         embed = message.embeds[0]
