@@ -1,7 +1,7 @@
 {
   "nick": "djqueue_",
-  "oauth": "oauth:we3ts6lxqym5wnxo40psyezzan8j4d",
-  "client_id": "hvtcbdpcc4chcs2622nz3d0bm5jj6j",
+  "oauth": "oauth:l3b4hbzbrjoxm4etazw8ecrsh3ht40",
+  "client_id": "2o0ept1x98wuv1ga6q49y4pbbjcvfh",
   "prefix": "!",
   "default_balance": 200,
   "loyalty_interval": 60,
@@ -11,7 +11,7 @@
     "djqueue_",
     "kittyn",
     "totless",
-    "sirchopwood"
+    "ramiris_"
   ],
   "mods_folder": "mods",
   "commands_folder": "commands",
