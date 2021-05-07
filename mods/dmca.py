@@ -4,7 +4,6 @@ from urllib.parse import urlparse
 from requests_html import HTMLSession
 from bs4 import BeautifulSoup as bs
 import datetime
-import sqlite3
 import json
 from googleapiclient.discovery import build
 import MongoDBInterface
@@ -42,17 +41,7 @@ class DMCA(Mod):
 
     yt_song_id = 2000
 
-    #con = sqlite3.connect("database.sqlite")
-
-    async def get_sql(self):
-        def dict_factory(cursor, row):
-            d = {}
-            for idx, col in enumerate(cursor.description):
-                d[col[0]] = row[idx]
-            return d
-        sql = sqlite3.connect("database.sqlite")
-        sql.row_factory = dict_factory
-        return sql
+    #con = ite3.connect("database.ite")
 
     #################################
     #####  Runs every time a message is recieved in chat
@@ -123,10 +112,6 @@ class DMCA(Mod):
     ######
     ######
     async def procVideo(self, uri, msg: Message):
-
-        sql = await self.get_sql()
-        cursor = sql.cursor()
-
 
 ################################
 ###     9999 = Storage record for current queue length

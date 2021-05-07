@@ -7,7 +7,7 @@ import os
 import sys
 import traceback
 import discord_bot.embedtemplates as embedtemplates
-import sqlite3
+import ite3
 import persistqueue
 from discord.ext import tasks
 import MongoDBInterface

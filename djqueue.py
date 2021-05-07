@@ -3,23 +3,8 @@ import asyncio
 import threading
 import discord_bot.discord_bot as discord_bot
 from twitchbot import BaseBot
-import sqlite3
 import json
 
-
-
-#############
-## clear requests db - will move this later
-##
-def botinit():
-    con = sqlite3.connect("database.sqlite")
-    cursor = con.cursor()
-    sqlite_query = """DELETE FROM song_requests;"""
-    cursor.execute(sqlite_query)
-    sqlite_query = """INSERT INTO song_requests (id, q_length) VALUES (9999, 0)"""
-    cursor.execute(sqlite_query)
-    con.commit()
-    con.close()
 
 
 def DiscordBot(secrets):
@@ -44,8 +29,6 @@ def TwitchBot():
 
 
 if __name__ == '__main__':
-    botinit()
-
     # Open secrets.json file for Tokens
     with open("secrets.json", "r") as file:
         secrets = json.load(file)

@@ -1,7 +1,7 @@
 {
   "connection": "{database_format}+{driver}://{username}:{password}@{address}:{port}/{database}",
-  "database_format": "mysql",
-  "driver": "mysqlconnector",
+  "database_format": "my",
+  "driver": "myconnector",
   "enabled": false,
   "address": "localhost",
   "port": "3306",
