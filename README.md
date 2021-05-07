@@ -8,12 +8,12 @@ DJ Queue bot for Just Dance Streams using Discord and Twitch
 - ***discord.py*** - Discord queue, stats, control panel https://discordpy.readthedocs.io/en/stable/ 
 
 
-###Chat Interface:
+### Chat Interface:
 
 !dmca #justdance
 !dmca youtubeurl
 
-###Discord Interface:
+### Discord Interface:
 
 Bot uses 2 discord channels
 - Channel 1 contains every song request that comes in
