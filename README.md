@@ -10,9 +10,9 @@ DJ Queue bot for Just Dance Streams using Discord and Twitch
 
 ### Chat Interface:
 
-`!dmca #justdance
-`
-`!dmca youtubeurl
+`!dmca #justdance`
+
+`!dmca youtubeurl`
 
 ### Discord Interface:
 
