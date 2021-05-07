@@ -7,10 +7,10 @@ import os
 import sys
 import traceback
 import discord_bot.embedtemplates as embedtemplates
-import sqlite3
+import ite3
 import persistqueue
 from discord.ext import tasks
-
+import MongoDBInterface
 
 class Bot(discord.Client):
     
@@ -18,26 +18,12 @@ class Bot(discord.Client):
     updated = 1
     Q_LEN = 1
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, GoogleAPIToken, *args, **kwargs):
         asyncio.get_event_loop()
         super().__init__(*args, **kwargs)
-        self.YT_API = build('youtube', 'v3', developerKey="AIzaSyDRB1VWeyZnmnKBYFg9NOg7YNd5Gpy__aY")
+        self.YT_API = build('youtube', 'v3', developerKey=GoogleAPIToken)
         self.check_queue.start()
-
-    #########################################################
-    ##
-    ##
-    ##
-    ##
-    async def get_sql(self):
-        def dict_factory(cursor, row):
-            d = {}
-            for idx, col in enumerate(cursor.description):
-                d[col[0]] = row[idx]
-            return d
-        sql = sqlite3.connect("database.sqlite")
-        sql.row_factory = dict_factory
-        return sql
+        self.mongo = MongoDBInterface.Main()
 
     #########################################################
     ##
@@ -81,10 +67,7 @@ class Bot(discord.Client):
     @tasks.loop(seconds=1) 
     async def check_queue(self):
 
-        sql = await self.get_sql()
-
-        cursor = sql.cursor()
-        dataset = cursor.execute('SELECT * FROM "song_requests"  WHERE "status" LIKE "%Pending%"')
+        dataset = self.mongo.db["Requests"].find({"Status": "Pending"})
         
         for data in dataset:
             await self.wait_until_ready()  # Ensure the Discord Bot is connected (waits if timed out for reconnect)
@@ -93,15 +76,12 @@ class Bot(discord.Client):
             spec.loader.exec_module(foo)
             message_id = await foo.Main(self, data)
             print("before d update")
-            cursor.execute('UPDATE "song_requests" SET "status" = "In Queue", "discord_message_id" = ' + str(message_id) + ' WHERE "song_id" = ' + str(data["song_id"]))
+            data["Status"] = "In Queue"
+            data["DiscordMessageID"] = message_id
+            self.mongo.db["Requests"].replace_one({"URI": data["URI"], "Status": "Pending"}, data)
             self.updated = 1
-            #sql.commit()
-            #cursor.close()
 
-        dataset = cursor.execute('SELECT * FROM "song_requests"  WHERE "status" LIKE "%In Queue%" ORDER BY id ASC')
-
-
-        #########
+        '''        #########
         ##  Table updated if this is true
         ##
         if self.updated:
@@ -130,7 +110,7 @@ class Bot(discord.Client):
                         spec.loader.exec_module(foo)
                         message_id = await foo.Main(self, data)
                         if message_id: 
-                            cursor.execute('UPDATE "song_requests" SET "status" = "In Queue", "djq_message_id" = ' + str(message_id) + ' WHERE "song_id" = ' + str(data["song_id"]))
+                            cursor.execute('UPDATE "song_requests" SET "status" = "In Queue", "djq_message_id" = ' + str(message_id) + ' WHERE "uri" = "' + str(data["uri"] +'"'))
                             if self.Q_LEN < 3:
                                 self.Q_LEN = self.Q_LEN + 1
 
@@ -145,11 +125,8 @@ class Bot(discord.Client):
                         break
 
                 #else:
-                    #print("continue")
+                    #print("continue")'''
 
-
-        sql.commit()
-        sql.close()
     #########################################################
     ##
     ##  Runs when bot starts

@@ -5,14 +5,16 @@ async def Main(self, data):
 
     channel = await self.fetch_channel(836759071138119701)  # Get Log Channel (Temporary)
     print("in main")
-
-    if data["uri"].isnumeric:
+    print(data["URI"], str(data["URI"]).isdigit())
+    if str(data["URI"]).isdigit():
         print("id int")
-        if data["x_requested"] == 0:
+        data["Name"] = self.mongo.db["PyPySongList"].find_one({"id": data["URI"]})
+        data["Name"] = data["Name"]["title"]
+        if data["TimesRequested"] == 1:
             embed = embedtemplates.pypy_request(data)
             print("if py py")
         else:
-            message = await channel.fetch_message(data["discord_message_id"])
+            message = await channel.fetch_message(data["DiscordMessageID"])
             embed = embedtemplates.pypy_request(data)
             await message.edit(content="", embed=embed)
             return message.id
@@ -50,25 +52,16 @@ async def Main(self, data):
 #
 #
 async def process_youtube(self, data):
-    song = data["request"]
-
-    if "youtu.be" in song:
-        song = song.replace("youtu.be/", "www.youtube.com/watch?v=")  # Fixed prefix
-        if "?" in song:
-            song = song.split("?")[0] + "?" + song.split("?")[1]  # Removes Shortened URL Metadata
-    else:
-        if "&" in song:
-            song = song.split("&")[0]  # Removes Full URL Metadata
-    data["request"] = song
+    song = data["URI"]
 
     request = self.YT_API.videos().list(  # Format Request to YouTube API
         part="snippet,contentDetails,statistics",
         id=song[32:]
     )
+
     response = request.execute()  # Send Request
     if len(response["items"]) == 0:  # Song not found
         return None
     else:  # Song Found
-        data["song_name"] = response["items"][0]["snippet"]["title"]
-        data["url"] = data["request"]
+        data["Name"] = response["items"][0]["snippet"]["title"]
         return data
