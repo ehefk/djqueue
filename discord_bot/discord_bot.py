@@ -93,7 +93,7 @@ class Bot(discord.Client):
             spec.loader.exec_module(foo)
             message_id = await foo.Main(self, data)
             print("before d update")
-            cursor.execute('UPDATE "song_requests" SET "status" = "In Queue", "discord_message_id" = ' + str(message_id) + ' WHERE "song_id" = ' + str(data["song_id"]))
+            cursor.execute('UPDATE "song_requests" SET "status" = "In Queue", "discord_message_id" = ' + str(message_id) + ' WHERE "uri" = "' + str(data["uri"] + '"'))
             self.updated = 1
             #sql.commit()
             #cursor.close()
@@ -130,7 +130,7 @@ class Bot(discord.Client):
                         spec.loader.exec_module(foo)
                         message_id = await foo.Main(self, data)
                         if message_id: 
-                            cursor.execute('UPDATE "song_requests" SET "status" = "In Queue", "djq_message_id" = ' + str(message_id) + ' WHERE "song_id" = ' + str(data["song_id"]))
+                            cursor.execute('UPDATE "song_requests" SET "status" = "In Queue", "djq_message_id" = ' + str(message_id) + ' WHERE "uri" = "' + str(data["uri"] +'"'))
                             if self.Q_LEN < 3:
                                 self.Q_LEN = self.Q_LEN + 1
 

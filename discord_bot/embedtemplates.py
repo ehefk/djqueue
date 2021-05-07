@@ -47,10 +47,11 @@ def pypy_request(data):
     return embed
 
 
-def song_request(new_data):
-    embed = discord.Embed(title=new_data["request"], colour=discord.Colour(0xffbb00),
-                          url=new_data["uri"], description=str("*Requested by: " + new_data["user"] + "*"),
+def song_request(data):
+    embed = discord.Embed(title="YouTube URL:  " + data["uri"], colour=discord.Colour(0xbb00bb),
+                          description=str("*Requested by: " + data["user"] + "*"),
                           timestamp=datetime.datetime.utcnow())
-    embed.add_field(name="PyPy ID / Video URL", value=new_data["uri"], inline=False)
-    embed.add_field(name="Times Played", value="Today: 0\nTotal: 0", inline=False)
+    embed.add_field(name="Title:", value=data["request"], inline=False)
+    embed.add_field(name="Played: ", value=data["x_played"], inline=True)
+    embed.add_field(name="Requests: ", value=data["x_requested"], inline=True)
     return embed

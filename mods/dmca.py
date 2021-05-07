@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup as bs
 import datetime
 import sqlite3
 import json
+from googleapiclient.discovery import build
 
 
 ####
@@ -95,7 +96,7 @@ class DMCA(Mod):
                     if word.isdigit():
                         self.songID = int(word)
                         songID = self.songID
-                        if songID < 1600 and songID > 0:
+                        if songID < 1566 and songID > 0:
                             ##################################
                             #####  Found valid song ID, process it
                             #####
@@ -103,7 +104,7 @@ class DMCA(Mod):
                             break
                         #############################
                         ## Not valid song ID
-                        elif songID > 1600 or songID < 1:
+                        elif songID > 1566 or songID < 1:
                             await msg.reply(f'{msg.author}, thanks for the request! {songID} is not a valid Just Dance video.  Please check https://pypy.niall.sh/ and try again!')
                             break
                 if not self.songID:
@@ -197,29 +198,68 @@ class DMCA(Mod):
         ##  uri is a YT link, see if it matches JD then load it
         ## 
         else:
-            title = ""
+            status = "Pending"
+            if "youtu.be" in uri:
+                uri = uri.replace("youtu.be/", "www.youtube.com/watch?v=")  # Fixed prefix
+                if "?" in uri:
+                    uri = uri.split("?")[0] + "?" + uri.split("?")[1]  # Removes Shortened URL Metadata
+            else:
+                if "&" in uri:
+                    uri = uri.split("&")[0]  # Removes Full URL Metadata
 
-        ################################################################
-        ################################################################
-        ###
-        ###     Chatbot will write out song info nodes to the queue
-        ###     Discordbot will read them and remove them from the queue
-        ###     Queue is a doubly-linked-list to allow random deletions
-        ###     Need some async functionality here to communicate w discordbot
-        ###
-        ###
+            with open("secrets.json", "r") as file:
+                secrets = json.load(file)
+            YT_API = build('youtube', 'v3', developerKey=secrets["GoogleAPIToken"])
 
-        ##############################################
-        ##  check if song already played, if so, increment request count and inform requester
-        ##
+            #  Format Request to YouTube API
+            request = YT_API.videos().list(part="snippet,contentDetails,statistics", id=uri[32:])
+            response = request.execute()  # Send Request
+            if len(response["items"]) == 0:  # Song not found
+                await msg.reply(f'{msg.author}, thanks for the request!  We are currrently only accepting youtube links or Just Dance song IDs (preferred).')
+                return
+            else:  # Song Found
+                title = response["items"][0]["snippet"]["title"]
 
-        ##############################################
-        ##  check if song already requested but not yet played, if so, increment request count
-        ##   - check if requester is in last 5 requests or requesting fitness Marshall Songs
-        ##      - add song to end of queue if not
-        ##      - add marshall requests to marshall queue
-        ##      - else add song to randomizer queue
-        ##
+                ################################################################
+                ################################################################
+                ###
+                ###     Chatbot will write out song info nodes to the queue
+                ###     Discordbot will read them and remove them from the queue
+                ###     Queue is a doubly-linked-list to allow random deletions
+                ###     Need some async functionality here to communicate w discordbot
+                ###
+                ###
+                if "Dance" not in title:
+                    await msg.reply(
+                        f'{msg.author}, thanks for the request!  We are currrently only accepting youtube links that contain Dance Instructional Videos.')
+                    return
+                ##############################################
+                ##  check if song already played, if so, increment request count and inform requester
+                ##
+
+                ##############################################
+                ##  check if song already requested but not yet played, if so, increment request count
+                ##   - check if requester is in last 5 requests or requesting fitness Marshall Songs
+                ##      - add song to end of queue if not
+                ##      - add marshall requests to marshall queue
+                ##      - else add song to randomizer queue
+                ##
+                if "Marshall" in title:
+                    dataset = cursor.execute(
+                        'SELECT * FROM "song_requests"  WHERE "status" LIKE "%In Queue%" ORDER BY id ASC')
+                    MarshallCount = 0
+                    for data in dataset:
+                        if "Marshall" in data["request"]:
+                            MarshallCount += 1
+                    if MarshallCount >= 2:
+                        status = "On Hold"
+
+
+
+                sqlite_query = """INSERT INTO song_requests (user, request, timestamp, status, discord_message_id, uri, x_played, x_requested) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""
+                cursor.execute(sqlite_query, (msg.author, title, datetime.datetime.now(), status, 1, uri, x_played, x_requested))
+                sql.commit()
+                cursor.close()
 
         ##############################################
         ##  
