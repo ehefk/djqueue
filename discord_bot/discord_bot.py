@@ -7,8 +7,8 @@ import os
 import sys
 import traceback
 import discord_bot.embedtemplates as embedtemplates
-import ite3
-import persistqueue
+#import ite3 - typo?
+#import persistqueue - not used
 from discord.ext import tasks
 import MongoDBInterface
 
