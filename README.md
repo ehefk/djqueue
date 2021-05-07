@@ -19,5 +19,5 @@ Bot uses 2 discord channels
 - Channel 1 contains every song request that comes in
 - Channel 2 contains the next X songs at the front of the queue
 
-- Click the X to delete the song from queue and remove visibility
-- Click the :Check: to delete the song from queue and leave visible (or mark song green ONLY if in channel 1)
+- Click the ✕ to delete the song from queue and remove visibility
+- Click the ✓ to delete the song from queue and leave visible (or mark song green ONLY if in channel 1)
