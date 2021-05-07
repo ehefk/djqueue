@@ -143,3 +143,4 @@ configs/.config.json.swp
 configs/.config.json.un~
 djqueue.py~
 .djqueue.py.un~
+/secrets.json

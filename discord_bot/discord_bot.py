@@ -18,10 +18,10 @@ class Bot(discord.Client):
     updated = 1
     Q_LEN = 1
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, GoogleAPIToken, *args, **kwargs):
         asyncio.get_event_loop()
         super().__init__(*args, **kwargs)
-        self.YT_API = build('youtube', 'v3', developerKey="AIzaSyDRB1VWeyZnmnKBYFg9NOg7YNd5Gpy__aY")
+        self.YT_API = build('youtube', 'v3', developerKey=GoogleAPIToken)
         self.check_queue.start()
 
     #########################################################
