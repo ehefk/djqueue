@@ -18,7 +18,8 @@ DJ Queue bot for Just Dance Streams using Discord and Twitch
 
 Bot uses 2 discord channels
 - Channel 1 contains every song request that comes in
-- Channel 2 contains the next X songs at the front of the queue
+- Channel 2 contains the next X songs at the front of the queue, current set to 3
+  - Would like to make 1 be for marshal queue and 1 for request spam randomizer queue
 
 - Click the ✕ to delete the song from queue and remove visibility
 - Click the ✓ to delete the song from queue and leave visible (or mark song green ONLY if in channel 1)
