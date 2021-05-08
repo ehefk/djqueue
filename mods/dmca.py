@@ -125,7 +125,7 @@ class DMCA(Mod):
 
         x_requested = 0
         x_played = 0
-        
+
 
         ##############################################
         ##  if uri is a valid integer, look up the ID and load it
@@ -160,6 +160,19 @@ class DMCA(Mod):
         ##  uri is a YT link, see if it matches JD then load it
         ## 
         else:
+            request = mongo.db["Requests"].find_one(
+                {"URI": uri, '$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}]})
+
+            if request:
+                request["TimesRequested"] += 1
+                mongo.db["Requests"].replace_one(
+                    {"URI": uri, '$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}]},
+                    request)
+                await msg.reply(
+                    f'{msg.author}, thanks for the request!  {request["Name"]}  Has now been requested {request["TimesRequested"]} times and played {request["TimesPlayed"]} times.')
+                return
+
+
             status = "Pending"
             if "youtu.be" in uri:
                 uri = uri.replace("youtu.be/", "www.youtube.com/watch?v=")  # Fixed prefix
@@ -183,7 +196,7 @@ class DMCA(Mod):
                 title = response["items"][0]["snippet"]["title"]
                 length = response["items"][0]["contentDetails"]["duration"]  # Length in format "PT##M##S"
                 length = int(length.split("M")[0][2:])*60 + int(length.split("M")[1][:-1])  # Length in Seconds
-                song = mongo.db["SongHistory"].find_one({"URI": int(uri)})
+                song = mongo.db["SongHistory"].find_one({"URI": uri})
 
                 ################################################################
                 ################################################################

@@ -19,7 +19,8 @@ async def Main(self, data):
             await message.edit(content="", embed=embed)
             return message.id
     else:
-        print("else")
+        print("else a YT link")
+        data = await process_youtube(self, data)
         embed = embedtemplates.song_request(data)
 
     message = await channel.send(content="", embed=embed)
@@ -63,5 +64,5 @@ async def process_youtube(self, data):
     if len(response["items"]) == 0:  # Song not found
         return None
     else:  # Song Found
-        data["Name"] = response["items"][0]["snippet"]["title"]
+        data["Name"] = str(response["items"][0]["snippet"]["title"])
         return data

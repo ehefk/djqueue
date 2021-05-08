@@ -7,8 +7,6 @@ import os
 import sys
 import traceback
 import discord_bot.embedtemplates as embedtemplates
-import ite3
-import persistqueue
 from discord.ext import tasks
 import MongoDBInterface
 
@@ -76,41 +74,48 @@ class Bot(discord.Client):
             spec.loader.exec_module(foo)
             message_id = await foo.Main(self, data)
             print("before d update")
-            data["Status"] = "In Queue"
             data["DiscordMessageID"] = message_id
+            data["Status"] = "In Queue"
             self.mongo.db["Requests"].replace_one({"URI": data["URI"], "Status": "Pending"}, data)
             self.updated = 1
 
-        '''        #########
+                #########
         ##  Table updated if this is true
         ##
         if self.updated:
             self.updated = 0
+            print("update")
 
             ############
             ###  Scan the rows, stop after a few (adjust Q_LEN)
             ###
+            dataset = self.mongo.db["Requests"].find({"Status": "Pending"})
             for data in dataset:
 
                 ###########
                 ##  Only interested if no message for dj ui
                 ##
                 ##
-                if data["djq_message_id"] is None:
+                print(data["URI"])
+                if "QueueMessageID" not in data.keys():
+                    print("No Queue message ID")
 
                     ##############
                     ##
                     ##  If there's already a few at the top for the dj then we're done
                     ##
                     if self.cnt < self.Q_LEN:
-                        #print("dj ui setup")
+                        print("dj ui setup")
 
                         spec = importlib.util.spec_from_file_location("module.name", str("discord_bot/handle_ui.py"))
                         foo = importlib.util.module_from_spec(spec)
                         spec.loader.exec_module(foo)
                         message_id = await foo.Main(self, data)
-                        if message_id: 
-                            cursor.execute('UPDATE "song_requests" SET "status" = "In Queue", "djq_message_id" = ' + str(message_id) + ' WHERE "uri" = "' + str(data["uri"] +'"'))
+                        if message_id:
+                            request = self.mongo.db["Requests"].find_one({'$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}], "URI": data["URI"]})
+                            request["QueueMessageID"] = message_id
+                            request["Status"] = "In Queue"
+                            self.mongo.db["Requests"].replace_one({'$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}], "URI": data["URI"]}, request)
                             if self.Q_LEN < 3:
                                 self.Q_LEN = self.Q_LEN + 1
 
@@ -125,7 +130,7 @@ class Bot(discord.Client):
                         break
 
                 #else:
-                    #print("continue")'''
+                    #print("continue")
 
     #########################################################
     ##
