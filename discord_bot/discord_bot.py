@@ -10,6 +10,7 @@ import discord_bot.embedtemplates as embedtemplates
 from discord.ext import tasks
 import MongoDBInterface
 
+
 class Bot(discord.Client):
     
     cnt = 0
@@ -22,6 +23,8 @@ class Bot(discord.Client):
         self.YT_API = build('youtube', 'v3', developerKey=GoogleAPIToken)
         self.check_queue.start()
         self.mongo = MongoDBInterface.Main()
+        self.queue_channel = 822329304557420565
+        self.request_channel = 836759071138119701
 
     #########################################################
     ##
@@ -57,6 +60,18 @@ class Bot(discord.Client):
             return None
         return content
 
+    async def refresh_queue(self):
+        channel = await self.fetch_channel(self.queue_channel)  # Get Log Channel (Temporary)
+        queue = self.mongo.db["QueueHistory"].find_one({"Status": "Open"})
+        if "DiscordMessageID" in queue.keys():
+            message = await channel.fetch_message(queue["DiscordMessageID"])
+            embed = embedtemplates.queue_card(self)
+            await message.edit(content="", embed=embed)
+        else:
+            embed = embedtemplates.queue_card(self)
+            message = await channel.send(content="", embed=embed)
+            queue["DiscordMessageID"] = message.id
+            self.mongo.db["QueueHistory"].replace_one({"Status": "Open"}, queue)
 
     ######################################################
     ##   Background tasks
@@ -74,13 +89,17 @@ class Bot(discord.Client):
             spec.loader.exec_module(foo)
             message_id = await foo.Main(self, data)
             print("before d update")
-            data["DiscordMessageID"] = message_id
-            data["Status"] = "In Queue"
-            self.mongo.db["Requests"].replace_one({"URI": data["URI"], "Status": "Pending"}, data)
-            self.updated = 1
+            if message_id:
+                data["DiscordMessageID"] = message_id
+                data["Status"] = "In Queue"
+                self.mongo.db["Requests"].replace_one({"URI": data["URI"], "Status": "Pending"}, data)
+                self.updated = 1
+                await self.refresh_queue()
+            else:
+                print("Message Post Failed - Discord Relay down?")
 
                 #########
-        ##  Table updated if this is true
+        '''##  Table updated if this is true
         ##
         if self.updated:
             self.updated = 0
@@ -130,7 +149,7 @@ class Bot(discord.Client):
                         break
 
                 #else:
-                    #print("continue")
+                    #print("continue")'''
 
     #########################################################
     ##

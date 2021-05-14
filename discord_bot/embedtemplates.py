@@ -55,3 +55,23 @@ def song_request(data):
     embed.add_field(name="Played: ", value=data["TimesPlayed"], inline=True)
     embed.add_field(name="Requests: ", value=data["TimesRequested"], inline=True)
     return embed
+
+
+def queue_card(self):
+    queue = self.mongo.db["QueueHistory"].find_one({"Status": "Open"})
+    print(queue)
+    if len(queue["Queue"]) > 20:
+        embed = discord.Embed(title="Current Queue", colour=discord.Colour(0x55aaff),
+                              description=str("20 / " + str(len(queue["Queue"]))),
+                              timestamp=datetime.datetime.utcnow())
+        for i in range(len(queue["Queue"])):
+            request = self.mongo.db["Requests"].find_one({"_id": queue["Queue"][i]})
+            embed.add_field(name=str(str(i) + ". " + request["Name"]), value=str(str(request["TimesRequested"]) + " | " + str(request["TimesPlayed"]) + " | " + str(request["URI"])), inline=False)
+    else:
+        embed = discord.Embed(title="Current Queue", colour=discord.Colour(0x55aaff),
+                              timestamp=datetime.datetime.utcnow())
+        for i in range(len(queue["Queue"])):
+            request = self.mongo.db["Requests"].find_one({"_id": queue["Queue"][i]})
+            embed.add_field(name=str(str(i) + ". " + request["Name"]), value=str(str(request["TimesRequested"]) + " | " + str(request["TimesPlayed"]) + " | " + str(request["URI"])), inline=False)
+    embed.set_footer(text="Reqs | Plays | ID/URL")
+    return embed

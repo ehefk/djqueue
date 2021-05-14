@@ -51,17 +51,53 @@ class DMCA(Mod):
     async def on_privmsg_received(self, msg: Message):
         extractor = URLExtract()
         frag = msg.content
+
+        modlist = ["balrogdaddy", "totless", "ramiris_", "kittyn", "tombstonesmb", "musician101"]
         #################################
         ##### Detected a request
         #####
         if '!dance' in frag:
             await msg.reply(f'{msg.author}, the pypy site is temporarily down but you can find the list here: https://bit.ly/3eJly0i')
 
-        if '!reset' in frag and msg.author.lower() == "ramiris_":
+        if '!reset' in frag and msg.author.lower() in modlist:
             mongo = MongoDBInterface.Main()  # Prepares the database ( NO Cursor required )
             mongo.db["Requests"].delete({'$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}]})  # Removes any uncomplete Requests
-            
+            await msg.reply(f'{msg.author}, Database reset')
+
+        if '!clear' in frag and msg.author.lower() in modlist:
+            mongo = MongoDBInterface.Main()  # Prepares the database ( NO Cursor required )
+            requests = mongo.db["Requests"].find({'$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}]})  # finds any uncomplete Requests
+            for request in requests:
+                request["Status"] = "Complete"
+                mongo.db["Requests"].replace_one({'$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}], 'URI': request['URI']}, request)
+            await msg.reply(f'{msg.author}, Database Cleared')
+
+        if '!open' in frag and msg.author.lower() in modlist:
+            mongo = MongoDBInterface.Main()  # Prepares the database ( NO Cursor required )
+            queue = mongo.db["QueueHistory"].find_one({'Status': "Open"})
+            if queue:
+                await msg.reply(f'{msg.author}, A Queue is already open! Use !close first.')
+            else:
+                mongo.db["QueueHistory"].insert_one({'QueuePos': 0, 'Queue': [], 'Status': 'Open'})
+                await msg.reply(f'{msg.author}, A Queue has been opened!')
+
+        if '!close' in frag and msg.author.lower() in modlist:
+            mongo = MongoDBInterface.Main()  # Prepares the database ( NO Cursor required )
+            queue = mongo.db["QueueHistory"].find_one({'Status': "Open"})
+            if queue:
+                queue["Status"] = "Closed"
+                mongo.db["QueueHistory"].replace_one({'Status': 'Open'}, queue)
+                await msg.reply(f'{msg.author}, The queue has been closed!')
+            else:
+                await msg.reply(f'{msg.author}, No queue is open!')
+
         if '!dmca' in frag:
+            mongo = MongoDBInterface.Main()  # Prepares the database ( NO Cursor required )
+            queue = mongo.db["QueueHistory"].find_one({'Status': "Open"})
+            print(queue)
+            if queue is None:
+                await msg.reply(f'{msg.author}, The queue is not open right now, please wait for a Moderator to open it!')
+                return
             ####################################
             #####  Check if it contains a URL
             #####
@@ -195,6 +231,8 @@ class DMCA(Mod):
             else:  # Song Found
                 title = response["items"][0]["snippet"]["title"]
                 length = response["items"][0]["contentDetails"]["duration"]  # Length in format "PT##M##S"
+                print(length.split("M")[0][2:])
+                print(length.split("M")[1][:-1])
                 length = int(length.split("M")[0][2:])*60 + int(length.split("M")[1][:-1])  # Length in Seconds
                 song = mongo.db["SongHistory"].find_one({"URI": uri})
 
