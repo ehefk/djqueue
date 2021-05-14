@@ -229,7 +229,7 @@ class DMCA(Mod):
                 ##      - add marshall requests to marshall queue
                 ##      - else add song to randomizer queue
                 ##
-                if "Marshall" in title:
+                '''if "Marshall" in title:
                     Search = mongo.db["Requests"].count_documents({'$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}], 'Tags': {'$in': ['Marshall']}})
                     if len(Search) >= 2:
 
@@ -237,6 +237,11 @@ class DMCA(Mod):
                             mongo.create_request(msg.author, uri, song["TimesPlayed"], status="On Hold")
                         else:
                             mongo.create_request(msg.author, uri, 0, status="On Hold")
+                    else:
+                        if song:
+                            mongo.create_request(msg.author, uri, song["TimesPlayed"], Tags=["Marshall"])
+                        else:
+                            mongo.create_request(msg.author, uri, 0, Tags=["Marshall"])''' # Need to fix Marshall tagging, for now is manual
 
                 if song:
                     mongo.create_request(msg.author, uri, song["TimesPlayed"])
