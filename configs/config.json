@@ -1,6 +1,6 @@
 {
   "nick": "djqueue_",
-  "oauth": "oauth:l3b4hbzbrjoxm4etazw8ecrsh3ht40",
+  "oauth": "oauth:cb24bypz3ua4evjgsggo57jr8sg2s5",
   "client_id": "2o0ept1x98wuv1ga6q49y4pbbjcvfh",
   "prefix": "!",
   "default_balance": 200,
@@ -10,8 +10,8 @@
   "channels": [
     "djqueue_",
     "kittyn",
-    "totless",
-    "ramiris_"
+    "ramiris_",
+    "totless"
   ],
   "mods_folder": "mods",
   "commands_folder": "commands",

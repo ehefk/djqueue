@@ -29,12 +29,12 @@ def question(question, username):
 
 
 def dj_update(data):
-    embed = discord.Embed(title="Next Up: " + data["request"], colour=discord.Colour(0xbb00bb),
-                          description=str("*Requested by: " + data["user"] + "*"),
+    embed = discord.Embed(title="Next Up: " + str(data["URI"]), colour=discord.Colour(0xbb00bb),
+                          description=str("*Requested by: " + data["User"] + "*"),
                           timestamp=datetime.datetime.utcnow())
-    embed.add_field(name="Title:", value=data["request"], inline=False)
-    embed.add_field(name="Played: ", value=data["x_played"], inline=True)
-    embed.add_field(name="Requests: ", value=data["x_requested"], inline=True)
+    embed.add_field(name="Title:", value=data["Name"], inline=False)
+    embed.add_field(name="Played: ", value=data["TimesPlayed"], inline=True)
+    embed.add_field(name="Requests: ", value=data["TimesRequested"], inline=True)
     return embed
 
 def pypy_request(data):
@@ -54,4 +54,26 @@ def song_request(data):
     embed.add_field(name="Title:", value=data["Name"], inline=False)
     embed.add_field(name="Played: ", value=data["TimesPlayed"], inline=True)
     embed.add_field(name="Requests: ", value=data["TimesRequested"], inline=True)
+    return embed
+
+
+def queue_card(self):
+    queue = self.mongo.db["QueueHistory"].find_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]})
+    print(queue)
+    if len(queue["Queue"]) > 20:
+        embed = discord.Embed(title="Current Queue", colour=discord.Colour(0x55aaff),
+                              description=str("20 / " + str(len(queue["Queue"]))),
+                              timestamp=datetime.datetime.utcnow())
+        for i in range(len(queue["Queue"])):
+            request = self.mongo.db["Requests"].find_one({"_id": queue["Queue"][i]})
+            '''channel = await self.fetch_channel(self.request_channel)
+            url = f"https://discord.com/channels/{channel.guild.id}/{channel.id}/{request['DiscordMessageID']}"''' # Reee discord wont support this
+            embed.add_field(name=str(str(i) + ". " + request["Name"]), value=str(str(request["TimesRequested"]) + " | " + str(request["TimesPlayed"]) + " | " + str(request["URI"])), inline=False)
+    else:
+        embed = discord.Embed(title="Current Queue", colour=discord.Colour(0x55aaff),
+                              timestamp=datetime.datetime.utcnow())
+        for i in range(len(queue["Queue"])):
+            request = self.mongo.db["Requests"].find_one({"_id": queue["Queue"][i]})
+            embed.add_field(name=str(str(i) + ". " + request["Name"]), value=str(str(request["TimesRequested"]) + " | " + str(request["TimesPlayed"]) + " | " + str(request["URI"])), inline=False)
+    embed.set_footer(text="Reqs | Plays | ID/URL")
     return embed

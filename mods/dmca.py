@@ -51,17 +51,21 @@ class DMCA(Mod):
     async def on_privmsg_received(self, msg: Message):
         extractor = URLExtract()
         frag = msg.content
+
+        modlist = ["balrogdaddy", "totless", "ramiris_", "kittyn", "tombstonesmb", "musician101"]
         #################################
         ##### Detected a request
         #####
         if '!dance' in frag:
             await msg.reply(f'{msg.author}, the pypy site is temporarily down but you can find the list here: https://bit.ly/3eJly0i')
 
-        if '!reset' in frag and msg.author.lower() == "ramiris_":
-            mongo = MongoDBInterface.Main()  # Prepares the database ( NO Cursor required )
-            mongo.db["Requests"].delete({'$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}]})  # Removes any uncomplete Requests
-            
         if '!dmca' in frag:
+            mongo = MongoDBInterface.Main()  # Prepares the database ( NO Cursor required )
+            queue = mongo.db["QueueHistory"].find_one({"Status": "Open"})
+            print(queue)
+            if queue is None:
+                await msg.reply(f'{msg.author}, The queue is not open right now, please wait for a Moderator to open it!')
+                return
             ####################################
             #####  Check if it contains a URL
             #####
@@ -125,7 +129,6 @@ class DMCA(Mod):
 
         x_requested = 0
         x_played = 0
-        
 
         ##############################################
         ##  if uri is a valid integer, look up the ID and load it
@@ -160,6 +163,19 @@ class DMCA(Mod):
         ##  uri is a YT link, see if it matches JD then load it
         ## 
         else:
+            request = mongo.db["Requests"].find_one(
+                {"URI": uri, '$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}]})
+
+            if request:
+                request["TimesRequested"] += 1
+                mongo.db["Requests"].replace_one(
+                    {"URI": uri, '$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}]},
+                    request)
+                await msg.reply(
+                    f'{msg.author}, thanks for the request!  {request["Name"]}  Has now been requested {request["TimesRequested"]} times and played {request["TimesPlayed"]} times.')
+                return
+
+
             status = "Pending"
             if "youtu.be" in uri:
                 uri = uri.replace("youtu.be/", "www.youtube.com/watch?v=")  # Fixed prefix
@@ -182,8 +198,12 @@ class DMCA(Mod):
             else:  # Song Found
                 title = response["items"][0]["snippet"]["title"]
                 length = response["items"][0]["contentDetails"]["duration"]  # Length in format "PT##M##S"
+                print(length.split("M")[0][2:])
+                print(length.split("M")[1][:-1])
+                if "H" in length.split("M")[0][2:]:
+                    length = length.split("H")[1]
                 length = int(length.split("M")[0][2:])*60 + int(length.split("M")[1][:-1])  # Length in Seconds
-                song = mongo.db["SongHistory"].find_one({"URI": int(uri)})
+                song = mongo.db["SongHistory"].find_one({"URI": uri})
 
                 ################################################################
                 ################################################################
@@ -209,7 +229,7 @@ class DMCA(Mod):
                 ##      - add marshall requests to marshall queue
                 ##      - else add song to randomizer queue
                 ##
-                if "Marshall" in title:
+                '''if "Marshall" in title:
                     Search = mongo.db["Requests"].count_documents({'$or': [{'Status': 'Pending'}, {'Status': 'On Hold'}, {'Status': 'In Queue'}], 'Tags': {'$in': ['Marshall']}})
                     if len(Search) >= 2:
 
@@ -217,23 +237,23 @@ class DMCA(Mod):
                             mongo.create_request(msg.author, uri, song["TimesPlayed"], status="On Hold")
                         else:
                             mongo.create_request(msg.author, uri, 0, status="On Hold")
+                    else:
+                        if song:
+                            mongo.create_request(msg.author, uri, song["TimesPlayed"], Tags=["Marshall"])
+                        else:
+                            mongo.create_request(msg.author, uri, 0, Tags=["Marshall"])''' # Need to fix Marshall tagging, for now is manual
 
                 if song:
                     mongo.create_request(msg.author, uri, song["TimesPlayed"])
                 else:
                     mongo.create_request(msg.author, uri, 0)
 
-                self.qETA += length
-
         ##############################################
         ##  
         #
-        qETA = self.qETA / 60
 
-        if x_requested > 0:
-            await msg.reply(f'{msg.author}, thanks for the request! {title} is #{qPos} in queue.  Requested {x_requested} times today.  Join discord to see the queue!')
-        else:
-            await msg.reply(f'{msg.author}, thanks for the request! {title} is #{qPos} in queue.  Join discord to see the queue!')
+        queue = mongo.db["QueueHistory"].find_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]})
+        await msg.reply(f'{msg.author}, thanks for the request! It is #{str(len(queue["Queue"])+1)} in queue.  Join discord to see the queue!')
 
         #await msg.reply(f'{msg.author}, thanks for the request! {title} is #{self.qPos} in queue.  The cursorrent ETA is approx {qETA} minutes.  Requested $xTimes today.  Join discord to see the queue!')
 

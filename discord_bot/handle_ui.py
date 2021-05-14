@@ -9,7 +9,7 @@ async def Main(self, data):
 #    print(data["discord_message_id"])
 #    print(data["djq_message_id"])
     
-    if data["djq_message_id"] is None:
+    if "QueueMessageID" not in data.keys():
         embed = embedtemplates.dj_update(data)
 
         message = await channel.send(content="", embed=embed)

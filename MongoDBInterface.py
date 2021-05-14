@@ -10,7 +10,7 @@ class Main:
         self.client = pymongo.MongoClient(secrets["MongoDBToken"])
         self.db = self.client['DJ_Fry']
 
-    def create_request(self, User, URI, TimesPlayed, Status="Pending"):
+    def create_request(self, User, URI, TimesPlayed, Status="Pending", Tags=[]):
         request = {"User": User,
                    "URI": URI,
                    "Timestamp": datetime.datetime.utcnow(),
