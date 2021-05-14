@@ -2,73 +2,24 @@
 DJ Queue bot for Just Dance Streams using Discord and Twitch
 
 - ***PythonTwitchBotFramework*** - Twitch IRC w PubSub client  https://pypi.org/project/PythonTwitchBotFramework/
+  - Might be able to get away from this in a future iteration
+  - Need to setup pubsub if want to handle point requests instead of chat messages; would be more efficient
+
 - ***discord.py*** - Discord queue, stats, control panel https://discordpy.readthedocs.io/en/stable/ 
 
-- User requests with points - uses Twitch PubSub client to track
-  - Bot rejects requests that aren't a URL or song number in the database
-  - Points refunded after request processed
 
-- Queue controlled in Discord channel, by reaction to recent bot posts
-  - Display unknown url metadata for DJ approval
+### Chat Interface:
 
-- Track duplicate requests per session & all time
-  - Alert DJ to duplicates in queue or reject if played too recently
+`!dmca #justdance`
 
+`!dmca youtubeurl`
 
-Twitch Output Example:
+### Discord Interface:
 
-  > "@xxx Song # or YT link plz"
-  
-  > "Artist - Title placed #xx in queue.  ETA: xx:xx  Requested X times today."
+Bot uses 2 discord channels
+- Channel 1 contains every song request that comes in
+- Channel 2 contains the next X songs at the front of the queue, current set to 3
+  - Would like to make 1 be for marshal queue and 1 for request spam randomizer queue
 
-
-Song Data
-
-```json
-{
-  "songId": 0,
-  "songInfo": {
-    "songArtist": "GHOSTDATA_",
-    "songName": "Full Bodied",
-    "songURI": "uri"
-  },
-  
-  "songStats": {
-    "songLength": 120,   #in seconds
-    "timesPlayed": 999,
-    "timesRequested": 1234
-  }
-}
-```
-
-Queue Data Node - Actually a doubly linked list
-
-```json
-{
-  "next": "next",
-  "prev": "prev",
-  "queuePos": 7,
-  "data": {
-    "songId": 0,
-    "songTitle": "GHOSTDATA_ Full Bodied",
-    "songURI": "uri",
-    "songLength": 120,   #in seconds
-    "queueETA": 120,   #in seconds
-    "timesPlayedToday": 3,
-    "timesRequestedToday": 6
-  }
-}
-```
-
-Already Played List - Delete nodes after they've been played and put here
-
-```json
-{
-  "songId":0
-  "data": {
-    "songId": 0,
-    "songTitle": "GHOSTDATA_ Full Bodied",
-    "songURI": "uri",
-    "timesPlayedToday": 3,
-    "timesRequestedToday": 6
-  }
+- Click the ✕ to delete the song from queue and remove visibility
+- Click the ✓ to delete the song from queue and leave visible (or mark song green ONLY if in channel 1)
