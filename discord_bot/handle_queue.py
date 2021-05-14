@@ -31,14 +31,13 @@ async def Main(self, data):
     self.mongo.db["Requests"].replace_one({"URI": data["URI"], "Status": "Pending"}, data)
     message = await channel.send(content="", embed=embed)
     await message.add_reaction("<:GreenTick:743466991771451394>")
-    await message.add_reaction("<:RightTick:797270413607567360>")
     await message.add_reaction("<:RedTick:743466992144744468>")
 #    message = await post_request(data, channel)
     #print(message.id)
-    queue = self.mongo.db["QueueHistory"].find_one({"Status": "Open"})
+    queue = self.mongo.db["QueueHistory"].find_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]})
     queue["Queue"].append(data["_id"])
     print(str(data["_id"]) + " added to queue")
-    self.mongo.db["QueueHistory"].replace_one({"Status": "Open"}, queue)
+    self.mongo.db["QueueHistory"].replace_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]}, queue)
     return message.id
 
 

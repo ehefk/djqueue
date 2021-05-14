@@ -23,8 +23,8 @@ class Bot(discord.Client):
         self.YT_API = build('youtube', 'v3', developerKey=GoogleAPIToken)
         self.check_queue.start()
         self.mongo = MongoDBInterface.Main()
-        self.queue_channel = 822329304557420565
-        self.request_channel = 836759071138119701
+        self.queue_channel = 842771764786495498
+        self.request_channel = 842771724311330846
 
     #########################################################
     ##
@@ -62,7 +62,7 @@ class Bot(discord.Client):
 
     async def refresh_queue(self):
         channel = await self.fetch_channel(self.queue_channel)  # Get Log Channel (Temporary)
-        queue = self.mongo.db["QueueHistory"].find_one({"Status": "Open"})
+        queue = self.mongo.db["QueueHistory"].find_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]})
         if "DiscordMessageID" in queue.keys():
             message = await channel.fetch_message(queue["DiscordMessageID"])
             embed = embedtemplates.queue_card(self)
@@ -70,8 +70,12 @@ class Bot(discord.Client):
         else:
             embed = embedtemplates.queue_card(self)
             message = await channel.send(content="", embed=embed)
+            await message.add_reaction("<:GreyTick:743466991981167138>")
             queue["DiscordMessageID"] = message.id
-            self.mongo.db["QueueHistory"].replace_one({"Status": "Open"}, queue)
+            self.mongo.db["QueueHistory"].replace_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]}, queue)
+
+    async def is_mod(self, userid):
+        return True
 
     ######################################################
     ##   Background tasks

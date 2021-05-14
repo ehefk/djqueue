@@ -58,7 +58,7 @@ def song_request(data):
 
 
 def queue_card(self):
-    queue = self.mongo.db["QueueHistory"].find_one({"Status": "Open"})
+    queue = self.mongo.db["QueueHistory"].find_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]})
     print(queue)
     if len(queue["Queue"]) > 20:
         embed = discord.Embed(title="Current Queue", colour=discord.Colour(0x55aaff),
@@ -66,6 +66,8 @@ def queue_card(self):
                               timestamp=datetime.datetime.utcnow())
         for i in range(len(queue["Queue"])):
             request = self.mongo.db["Requests"].find_one({"_id": queue["Queue"][i]})
+            '''channel = await self.fetch_channel(self.request_channel)
+            url = f"https://discord.com/channels/{channel.guild.id}/{channel.id}/{request['DiscordMessageID']}"''' # Reee discord wont support this
             embed.add_field(name=str(str(i) + ". " + request["Name"]), value=str(str(request["TimesRequested"]) + " | " + str(request["TimesPlayed"]) + " | " + str(request["URI"])), inline=False)
     else:
         embed = discord.Embed(title="Current Queue", colour=discord.Colour(0x55aaff),
