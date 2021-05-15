@@ -141,6 +141,7 @@ cython_debug/
 .djqueue.py.un~
 configs/.config.json.swp
 configs/.config.json.un~
+configs/config.json
 djqueue.py~
 .djqueue.py.un~
 /secrets.json
