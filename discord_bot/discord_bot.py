@@ -63,16 +63,27 @@ class Bot(discord.Client):
     async def refresh_queue(self):
         channel = await self.fetch_channel(self.queue_channel)  # Get Log Channel (Temporary)
         queue = self.mongo.db["QueueHistory"].find_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]})
-        if "DiscordMessageID" in queue.keys():
-            message = await channel.fetch_message(queue["DiscordMessageID"])
-            embed = embedtemplates.queue_card(self)
-            await message.edit(content="", embed=embed)
-        else:
-            embed = embedtemplates.queue_card(self)
-            message = await channel.send(content="", embed=embed)
+        if queue:
+            if "DiscordMessageID" in queue.keys():
+                message = await channel.fetch_message(queue["DiscordMessageID"])
+                embed = embedtemplates.queue_card(self)
+                await message.edit(content="", embed=embed)
+            else:
+                embed = embedtemplates.queue_card(self)
+                message = await channel.send(content="", embed=embed)
+                queue["DiscordMessageID"] = message.id
+                self.mongo.db["QueueHistory"].replace_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]}, queue)
+
+            await message.clear_reactions()
             await message.add_reaction("<:GreyTick:743466991981167138>")
-            queue["DiscordMessageID"] = message.id
-            self.mongo.db["QueueHistory"].replace_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]}, queue)
+            await message.add_reaction("1️⃣")
+            await message.add_reaction("2️⃣")
+            await message.add_reaction("3️⃣")
+            await message.add_reaction("4️⃣")
+            await message.add_reaction("5️⃣")
+            return True
+        else:
+            return False
 
     async def is_mod(self, userid):
         modlist = [74912563418107904, 110838934644211712]
