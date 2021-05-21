@@ -2,6 +2,10 @@ import discord
 
 
 async def Main(self, channel, message, user, emoji):
+    Perms = await self.is_mod(user.id)
+    if Perms == False:
+        return
+
     async def complete_request():
         Request = self.mongo.db["Requests"].find_one({"DiscordMessageID": message.id})
         if Request:
@@ -26,7 +30,7 @@ async def Main(self, channel, message, user, emoji):
 
     if "RedTick" in str(emoji):
         if len(message.embeds) > 0:
-            if "PyPy Song ID" in message.embeds[0].title or "YouTube URL" in message.embeds[0].title and await self.is_mod(user.id):
+            if "PyPy Song ID" in message.embeds[0].title or "YouTube URL" in message.embeds[0].title:
                 embed = message.embeds[0]
                 embed.colour = discord.Colour(0xff001e)
                 embed.description = embed.description + "\n Request Declined"

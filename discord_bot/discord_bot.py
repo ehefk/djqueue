@@ -75,7 +75,11 @@ class Bot(discord.Client):
             self.mongo.db["QueueHistory"].replace_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]}, queue)
 
     async def is_mod(self, userid):
-        return True
+        modlist = [74912563418107904, 110838934644211712]
+        if userid in modlist:
+            return True
+        else:
+            return False
 
     ######################################################
     ##   Background tasks
