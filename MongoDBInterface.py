@@ -8,7 +8,7 @@ class Main:
         with open("secrets.json", "r") as file:
             secrets = json.load(file)
         self.client = pymongo.MongoClient(secrets["MongoDBToken"])
-        self.db = self.client['DJ_Fry']
+        self.db = self.client['DJFry']
 
     def create_request(self, User, URI, TimesPlayed, Status="Pending", Tags=[]):
         request = {"User": User,
