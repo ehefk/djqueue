@@ -7,7 +7,7 @@ import datetime
 import json
 from googleapiclient.discovery import build
 import MongoDBInterface
-import logging
+import log_system
 
 
 ####
@@ -44,7 +44,7 @@ class DMCA(Mod):
 
     #con = ite3.connect("database.ite")
     def __init__(self):
-        self.logger = logging.getLogger("DJFry")
+        self.logger = log_system.Main()
 
     #################################
     #####  Runs every time a message is recieved in chat

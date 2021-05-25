@@ -9,7 +9,7 @@ import traceback
 import discord_bot.embedtemplates as embedtemplates
 from discord.ext import tasks
 import MongoDBInterface
-import logging
+import log_system
 
 
 class Bot(discord.Client):
@@ -26,7 +26,7 @@ class Bot(discord.Client):
         self.mongo = MongoDBInterface.Main()
         self.queue_channel = 842771764786495498
         self.request_channel = 842771724311330846
-        self.logger = logging.getLogger("DJFry")
+        self.logger = log_system.Main()
 
     #########################################################
     ##

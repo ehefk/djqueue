@@ -4,7 +4,7 @@ import threading
 import discord_bot.discord_bot as discord_bot
 from twitchbot import BaseBot
 import json
-import logging
+import log_system
 
 
 def DiscordBot(secrets):
@@ -33,7 +33,7 @@ if __name__ == '__main__':
     with open("secrets.json", "r") as file:
         secrets = json.load(file)
 
-    logger = logging.getLogger("DJFry")
+    logger = log_system.Main()
 
     # Setup Thread for Discord Bot
     DiscordThread = threading.Thread(target=DiscordBot, args=(secrets, ))
