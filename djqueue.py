@@ -4,6 +4,9 @@ import threading
 import discord_bot.discord_bot as discord_bot
 from twitchbot import BaseBot
 import json
+import os
+
+os.environ['JOBLIB_TEMP_FOLDER'] = '/home/container/ostemp'
 
 
 
