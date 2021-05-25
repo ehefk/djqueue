@@ -5,15 +5,15 @@ import discord
 async def Main(self, data):
 
     channel = await self.fetch_channel(self.request_channel)  # Get Log Channel (Temporary)
-    print("in main")
-    print(data["URI"], str(data["URI"]).isdigit())
+    self.logger.debug("in main")
+    self.logger.debug(data["URI"], str(data["URI"]).isdigit())
     if str(data["URI"]).isdigit():
-        print("id int")
+        self.logger.debug("id int")
         data["Name"] = self.mongo.db["PyPySongList"].find_one({"id": data["URI"]})
         data["Name"] = data["Name"]["title"]
         if data["TimesRequested"] == 1:
             embed = embedtemplates.pypy_request(data)
-            print("if py py")
+            self.logger.debug("if py py")
         else:
             try:
                 message = await channel.fetch_message(data["DiscordMessageID"])
@@ -24,7 +24,7 @@ async def Main(self, data):
                 embed = embedtemplates.pypy_request(data)
 
     else:
-        print("else a YT link")
+        self.logger.debug("else a YT link")
         data = await process_youtube(self, data)
         embed = embedtemplates.song_request(data)
 
@@ -33,10 +33,10 @@ async def Main(self, data):
     await message.add_reaction("<:GreenTick:743466991771451394>")
     await message.add_reaction("<:RedTick:743466992144744468>")
 #    message = await post_request(data, channel)
-    #print(message.id)
+    self.logger.debug(message.id)
     queue = self.mongo.db["QueueHistory"].find_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]})
     queue["Queue"].append(data["_id"])
-    print(str(data["_id"]) + " added to queue")
+    self.logger.debug(str(data["_id"]) + " added to queue")
     self.mongo.db["QueueHistory"].replace_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]}, queue)
     return message.id
 

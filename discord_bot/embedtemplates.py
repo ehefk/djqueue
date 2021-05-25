@@ -59,7 +59,7 @@ def song_request(data):
 
 def queue_card(self):
     queue = self.mongo.db["QueueHistory"].find_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]})
-    print(queue)
+    self.logger.debug(queue)
     if len(queue["Queue"]) > 5:
         embed = discord.Embed(title="Current Queue", colour=discord.Colour(0x55aaff),
                               description=str("5 / " + str(len(queue["Queue"]))),

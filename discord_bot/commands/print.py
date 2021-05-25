@@ -1,2 +1,2 @@
 async def Main(self, message, command, arguments):
-    print(message.content)
+    self.logger.debug(message.content)

@@ -7,6 +7,7 @@ import datetime
 import json
 from googleapiclient.discovery import build
 import MongoDBInterface
+import logging
 
 
 ####
@@ -42,6 +43,8 @@ class DMCA(Mod):
     yt_song_id = 2000
 
     #con = ite3.connect("database.ite")
+    def __init__(self):
+        self.logger = logging.getLogger("DJFry")
 
     #################################
     #####  Runs every time a message is recieved in chat
@@ -62,7 +65,7 @@ class DMCA(Mod):
         if '!dmca' in frag:
             mongo = MongoDBInterface.Main()  # Prepares the database ( NO Cursor required )
             queue = mongo.db["QueueHistory"].find_one({"Status": "Open"})
-            print(queue)
+            self.logger.debug(queue)
             if queue is None:
                 await msg.reply(f'{msg.author}, The queue is not open right now, please wait for a Moderator to open it!')
                 return
@@ -74,7 +77,7 @@ class DMCA(Mod):
             if uri:
 
                 o = urlparse(uri[0])
-                #print(o)
+                #self.logger.debug(o)
 
                 if 'youtube' in o.netloc or 'youtu.be' in o.netloc:
                     ##################################
@@ -123,7 +126,7 @@ class DMCA(Mod):
 ###
         mongo = MongoDBInterface.Main()  # Prepares the database ( NO Cursor required )
         qPos = str(mongo.db["Requests"].count_documents({'Status': 'In Queue'}))
-        print("qPos => " + qPos)
+        self.logger.debug("qPos => " + qPos)
 
         title = ""
 
@@ -198,8 +201,8 @@ class DMCA(Mod):
             else:  # Song Found
                 title = response["items"][0]["snippet"]["title"]
                 length = response["items"][0]["contentDetails"]["duration"]  # Length in format "PT##M##S"
-                print(length.split("M")[0][2:])
-                print(length.split("M")[1][:-1])
+                self.logger.debug(length.split("M")[0][2:])
+                self.logger.debug(length.split("M")[1][:-1])
                 if "H" in length.split("M")[0][2:]:
                     length = length.split("H")[1]
                 length = int(length.split("M")[0][2:])*60 + int(length.split("M")[1][:-1])  # Length in Seconds

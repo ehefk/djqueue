@@ -9,6 +9,7 @@ import traceback
 import discord_bot.embedtemplates as embedtemplates
 from discord.ext import tasks
 import MongoDBInterface
+import logging
 
 
 class Bot(discord.Client):
@@ -25,6 +26,7 @@ class Bot(discord.Client):
         self.mongo = MongoDBInterface.Main()
         self.queue_channel = 842771764786495498
         self.request_channel = 842771724311330846
+        self.logger = logging.getLogger("DJFry")
 
     #########################################################
     ##
@@ -107,7 +109,7 @@ class Bot(discord.Client):
             foo = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(foo)
             message_id = await foo.Main(self, data)
-            print("before d update")
+            self.logger.debug("before d update")
             if message_id:
                 data["DiscordMessageID"] = message_id
                 data["Status"] = "In Queue"
@@ -115,14 +117,14 @@ class Bot(discord.Client):
                 self.updated = 1
                 await self.refresh_queue()
             else:
-                print("Message Post Failed - Discord Relay down?")
+                self.logger.error("Message Post Failed - Discord Relay down?")
 
                 #########
         '''##  Table updated if this is true
         ##
         if self.updated:
             self.updated = 0
-            print("update")
+            self.logger.debug("update")
 
             ############
             ###  Scan the rows, stop after a few (adjust Q_LEN)
@@ -134,16 +136,16 @@ class Bot(discord.Client):
                 ##  Only interested if no message for dj ui
                 ##
                 ##
-                print(data["URI"])
+                self.logger.debug(data["URI"])
                 if "QueueMessageID" not in data.keys():
-                    print("No Queue message ID")
+                    self.logger.debug("No Queue message ID")
 
                     ##############
                     ##
                     ##  If there's already a few at the top for the dj then we're done
                     ##
                     if self.cnt < self.Q_LEN:
-                        print("dj ui setup")
+                        self.logger.debug("dj ui setup")
 
                         spec = importlib.util.spec_from_file_location("module.name", str("discord_bot/handle_ui.py"))
                         foo = importlib.util.module_from_spec(spec)
@@ -167,8 +169,8 @@ class Bot(discord.Client):
                     else:
                         break
 
-                #else:
-                    #print("continue")'''
+                else:
+                    self.logger.debug("continue")'''
 
     #########################################################
     ##
@@ -176,7 +178,7 @@ class Bot(discord.Client):
     ##
     ##
     async def on_ready(self):
-        print('Logged into discord as "{0.user}"'.format(self))
+        self.logger.info('Logged into discord as "{0.user}"'.format(self))
         activity = discord.Activity(name="music.", type=discord.ActivityType.listening)
         await self.change_presence(activity=activity)
         #self.loop.create_task(await self.check_queue())
@@ -202,7 +204,8 @@ class Bot(discord.Client):
         for string in traceback.format_tb(tb):
             tbs = tbs + string
         tbs = tbs + "```"
-        print(tbs)
+        self.logger.exception("*" + type.__name__ + " exception handled in " + event + channel + " : " + str(
+            value) + "*\n\n```\n")
         await self.get_user(110838934644211712).send(tbs)
 
     async def on_message(self, message):
@@ -238,7 +241,7 @@ class Bot(discord.Client):
                     return None
                 return response
             except discord.Forbidden:
-                print(user.name, "Could not be messaged.")
+                self.logger.error(user.name, "Could not be messaged.")
                 return None
 
     #########################################################
