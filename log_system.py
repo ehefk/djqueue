@@ -4,7 +4,7 @@ import logging
 def Main():
     logger = logging.getLogger("DJFry")
 
-    formatter = logging.Formatter('%(asctime)s | %(levelname)s - (%(message)s):%(module)s')
+    formatter = logging.Formatter('%(asctime)s | %(levelname)s - (%(module)s):%(message)s')
 
     console_logs = logging.StreamHandler()
     console_logs.setLevel(logging.INFO)
