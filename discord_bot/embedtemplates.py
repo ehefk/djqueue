@@ -66,7 +66,7 @@ def queue_card(self):
                               timestamp=datetime.datetime.utcnow())
         for i in range(5):
             request = self.mongo.db["Requests"].find_one({"_id": queue["Queue"][i]})
-            '''channel = await self.fetch_channel(self.request_channel)
+            '''channel = await self.fetch_channel(self.secrets["PublicChannel"])
             url = f"https://discord.com/channels/{channel.guild.id}/{channel.id}/{request['DiscordMessageID']}"''' # Reee discord wont support this
             embed.add_field(name=str(str(i+1) + ". " + request["Name"]), value=str(str(request["TimesRequested"]) + " | " + str(request["TimesPlayed"]) + " | " + str(request["URI"])), inline=False)
     else:

@@ -12,7 +12,7 @@ def DiscordBot(secrets):
     discordloop = asyncio.new_event_loop()
     asyncio.set_event_loop(discordloop)
     asyncio.get_event_loop()
-    bot = discord_bot.Bot(secrets["GoogleAPIToken"])
+    bot = discord_bot.Bot(secrets)
     discordloop.create_task(bot.start(secrets["DiscordBotToken"]))
     logger.info("Starting Discord Loop")
     discordloop.run_forever()

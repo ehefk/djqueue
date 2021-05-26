@@ -18,14 +18,13 @@ class Bot(discord.Client):
     updated = 1
     Q_LEN = 1
 
-    def __init__(self, GoogleAPIToken, *args, **kwargs):
+    def __init__(self, secrets, *args, **kwargs):
         asyncio.get_event_loop()
         super().__init__(*args, **kwargs)
-        self.YT_API = build('youtube', 'v3', developerKey=GoogleAPIToken)
+        self.secrets = secrets
+        self.YT_API = build('youtube', 'v3', developerKey=secrets["GoogleAPIToken"])
         self.check_queue.start()
         self.mongo = MongoDBInterface.Main()
-        self.queue_channel = 842771764786495498
-        self.request_channel = 842771724311330846
         self.logger = log_system.Main()
 
     #########################################################
@@ -63,7 +62,7 @@ class Bot(discord.Client):
         return content
 
     async def refresh_queue(self):
-        channel = await self.fetch_channel(self.queue_channel)  # Get Log Channel (Temporary)
+        channel = await self.fetch_channel(self.secrets["Public_Channel"])  # Get Log Channel (Temporary)
         queue = self.mongo.db["QueueHistory"].find_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]})
         if queue:
             if "DiscordMessageID" in queue.keys():
@@ -87,12 +86,12 @@ class Bot(discord.Client):
         else:
             return False
 
-    async def is_mod(self, userid):
-        modlist = [74912563418107904, 110838934644211712]
-        if userid in modlist:
-            return True
-        else:
-            return False
+    async def is_dj(self, member):
+        for role in member.roles:
+            if role in self.secrets["DJRoles"]:
+                return True
+            else:
+                return False
 
     ######################################################
     ##   Background tasks
@@ -198,15 +197,8 @@ class Bot(discord.Client):
             await args[0].channel.send(
                 "*An error occured, sorry for the inconvenience. Ramiris has been notified of the error.*")
         else:
-            channel = ""
-        tbs = "*" + type.__name__ + " exception handled in " + event + channel + " : " + str(
-            value) + "*\n\n```\n"
-        for string in traceback.format_tb(tb):
-            tbs = tbs + string
-        tbs = tbs + "```"
-        self.logger.exception("*" + type.__name__ + " exception handled in " + event + channel + " : " + str(
-            value) + "*\n\n```\n")
-        await self.get_user(110838934644211712).send(tbs)
+            channel = "Bot Core"
+        self.logger.exception(type.__name__ + " exception handled in " + channel)
 
     async def on_message(self, message):
         if message.author.bot or message.channel.type == discord.ChannelType.private or message.channel.type == discord.ChannelType.group:
@@ -252,7 +244,7 @@ class Bot(discord.Client):
     async def on_raw_reaction_add(self, payload):
         channel = await self.fetch_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
-        user = await self.fetch_user(payload.user_id)
+        user = await channel.guild.fetch_member(payload.user_id)
         emoji = payload.emoji
 
         if user.bot or message.channel.type == discord.ChannelType.private or message.channel.type == discord.ChannelType.group:
@@ -265,5 +257,3 @@ class Bot(discord.Client):
             self.updated = await foo.Main(self, channel, message, user, emoji)
             if self.updated == 1:
                 self.cnt = self.cnt - 1
-        
-            

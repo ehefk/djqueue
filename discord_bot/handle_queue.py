@@ -4,7 +4,7 @@ import discord
 
 async def Main(self, data):
 
-    channel = await self.fetch_channel(self.request_channel)  # Get Log Channel (Temporary)
+    channel = await self.fetch_channel(self.secrets["PublicChannel"])  # Get Log Channel (Temporary)
     self.logger.debug("in main")
     self.logger.debug(data["URI"], str(data["URI"]).isdigit())
     if str(data["URI"]).isdigit():

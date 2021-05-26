@@ -1,5 +1,5 @@
 async def Main(self, message, command, arguments):
-    channel = await self.fetch_channel(self.request_channel)
+    channel = await self.fetch_channel(self.secrets["PublicChannel"])
 
     queue = self.mongo.db["QueueHistory"].find_one({'Status': "Open"})
     if queue:

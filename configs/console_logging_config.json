@@ -1,7 +1,7 @@
 {
-  "log_privmsg": true,
-  "log_whisper": true,
-  "log_command_usage": true,
-  "log_whisper_sent": true,
-  "log_privmsg_sent": true
+  "log_privmsg": false,
+  "log_whisper": false,
+  "log_command_usage": false,
+  "log_whisper_sent": false,
+  "log_privmsg_sent": false
 }

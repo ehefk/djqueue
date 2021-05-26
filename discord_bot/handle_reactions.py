@@ -2,7 +2,7 @@ import discord
 
 
 async def Main(self, channel, message, user, emoji):
-    Perms = await self.is_mod(user.id)
+    Perms = await self.is_dj(user)
     if Perms == False:
         return
 
@@ -19,7 +19,7 @@ async def Main(self, channel, message, user, emoji):
 
     async def queue_number(num):
         queue = self.mongo.db["QueueHistory"].find_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]})
-        postchannel = await self.fetch_channel(self.request_channel)
+        postchannel = await self.fetch_channel(self.secrets["PublicChannel"])
         request = self.mongo.db["Requests"].find_one({"_id": queue["Queue"][num]})
         post = await postchannel.fetch_message(request["DiscordMessageID"])
 

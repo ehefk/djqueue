@@ -1,7 +1,7 @@
 async def Main(self, message, command, arguments):
-    channel = await self.fetch_channel(self.request_channel)
+    channel = await self.fetch_channel(self.secrets["PublicChannel"])
     guild = message.guild
-    wholesome_regular = guild.get_role(645994339599908864)
+    wholesome_regular = guild.get_role(self.secrets["VisibilityRole"])
 
     queue = self.mongo.db["QueueHistory"].find_one({'$or': [{"Status": "Open"}, {"Status": "Locked"}]})
     if queue:
